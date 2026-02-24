@@ -8,10 +8,10 @@ jobs:
       - name: 拉取项目源码
         uses: actions/checkout@v4
 
-      - name: 安装Flutter SDK (3.26.0) - 关键版本！
+      - name: 安装Flutter SDK (3.27.0) - 关键版本！
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.26.0' # 此版本自带Dart 3.6.0，完美匹配项目
+          flutter-version: '3.27.0' # 此版本自带Dart 3.6.0，完美匹配项目
           channel: 'stable'
 
       - name: 进入Flutter应用目录

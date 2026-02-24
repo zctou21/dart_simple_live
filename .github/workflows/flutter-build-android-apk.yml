@@ -1,23 +1,31 @@
 name: Flutter Build Android APK
 on:
-  workflow_dispatch: # 手动点击触发编译，超简单
+  workflow_dispatch:
 jobs:
   build:
-    runs-on: ubuntu-latest # 云端Ubuntu服务器，打包Android更稳定
+    runs-on: ubuntu-latest
     steps:
       - name: 拉取项目源码
         uses: actions/checkout@v4
-      - name: 安装Flutter SDK（云端自动装，不用本地管）
+
+      - name: 安装Flutter SDK
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.0' # 稳定版Flutter，适配所有Dart项目
+          flutter-version: '3.22.0'
           channel: 'stable'
-      - name: 安装Flutter/Dart依赖（云端自动下，不用翻墙）
-        run: flutter pub get
-      - name: 构建Android正式版APK（生成可直接安装的版本）
-        run: flutter build apk --release --no-tree-shake-icons
-      - name: 上传编译好的APK（供手机下载）
+
+      - name: 进入Flutter应用目录并安装依赖
+        run: |
+          cd simple_live_app
+          flutter pub get
+
+      - name: 构建Android正式版APK
+        run: |
+          cd simple_live_app
+          flutter build apk --release --no-tree-shake-icons
+
+      - name: 上传编译好的APK
         uses: actions/upload-artifact@v4
         with:
           name: dart-simple-live-android-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: simple_live_app/build/app/outputs/flutter-apk/app-release.apk

@@ -7,6 +7,11 @@ on:
       - master
   workflow_dispatch:
 
+# 在这里统一设置全局工作目录，避免在每个 step 里重复设置导致路径叠加
+defaults:
+  run:
+    working-directory: ./dart_simple_live
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -26,7 +31,6 @@ jobs:
         with:
           channel: 'stable'
 
-      # 直接在当前目录下执行，不再手动指定 working-directory
       - name: Install dependencies
         run: flutter pub get
 
@@ -37,4 +41,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dart-simple-live-apk
-          path: build/app/outputs/flutter-apk/*.apk
+          # 注意：上传产物时需要指定完整路径，不受上面的 defaults 影响
+          path: dart_simple_live/build/app/outputs/flutter-apk/*.apk

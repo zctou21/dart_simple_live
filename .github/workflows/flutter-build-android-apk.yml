@@ -2,15 +2,8 @@ name: Build Android APK
 
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: [ "main", "master" ]
   workflow_dispatch:
-
-# 在这里统一设置全局工作目录，避免在每个 step 里重复设置导致路径叠加
-defaults:
-  run:
-    working-directory: ./dart_simple_live
 
 jobs:
   build:
@@ -31,15 +24,24 @@ jobs:
         with:
           channel: 'stable'
 
+      # 关键步骤：自动寻找 pubspec.yaml 所在的文件夹并进入
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          # 寻找 pubspec.yaml 所在的目录
+          PROJECT_ROOT=$(find . -name "pubspec.yaml" -exec dirname {} \;)
+          echo "Found project root at: $PROJECT_ROOT"
+          cd $PROJECT_ROOT
+          flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release --split-per-abi
+        run: |
+          PROJECT_ROOT=$(find . -name "pubspec.yaml" -exec dirname {} \;)
+          cd $PROJECT_ROOT
+          flutter build apk --release --split-per-abi
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: dart-simple-live-apk
-          # 注意：上传产物时需要指定完整路径，不受上面的 defaults 影响
-          path: dart_simple_live/build/app/outputs/flutter-apk/*.apk
+          # 动态匹配所有生成的 apk 文件，不管它在哪个子目录下
+          path: "**/build/app/outputs/flutter-apk/*.apk"

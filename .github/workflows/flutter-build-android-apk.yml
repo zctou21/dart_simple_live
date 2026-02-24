@@ -31,20 +31,22 @@ jobs:
           flutter pub add intl:0.20.2
           flutter pub get
 
-      # 2. 现场生成一个签名文件并配置 key.properties
+      # 2. 精准定位生成签名文件
       - name: Create Keystore and key.properties
-        working-directory: ./simple_live_app/android
         run: |
-          # 现场生成一个名为 release.keystore 的签名文件
-          keytool -genkey -v -keystore release.keystore -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" -storepass android -keypass android
-          
-          # 将配置写入 key.properties，注意 storeFile 指向我们刚生成的这个文件
+          # 进入 android 目录创建配置文件
+          cd simple_live_app/android
           echo "storePassword=android" > key.properties
           echo "keyPassword=android" >> key.properties
           echo "keyAlias=androiddebugkey" >> key.properties
+          # 告诉 Gradle 去当前同级目录找（因为 Gradle 运行上下文在 app 目录）
           echo "storeFile=release.keystore" >> key.properties
+          
+          # 进入 app 目录生成真正的签名库文件 (这是之前的报错点)
+          cd app
+          keytool -genkey -v -keystore release.keystore -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" -storepass android -keypass android
 
-      # 3. 正式构建
+      # 3. 执行构建
       - name: Build APK
         working-directory: ./simple_live_app
         run: flutter build apk --release --split-per-abi

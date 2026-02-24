@@ -1,6 +1,6 @@
 name: Flutter Build Android APK
 on:
-  workflow_dispatch:
+  workflow_dispatch: # 手动触发
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -8,15 +8,20 @@ jobs:
       - name: 拉取项目源码
         uses: actions/checkout@v4
 
-      - name: 安装Flutter SDK
+      - name: 安装Flutter SDK (3.26.0) - 关键版本！
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.26.0' # 此版本自带Dart 3.6.0，完美匹配项目
           channel: 'stable'
 
-      - name: 进入Flutter应用目录并安装依赖
+      - name: 进入Flutter应用目录
+        run: cd simple_live_app
+
+      - name: 修复依赖冲突并安装 (自动覆盖intl版本)
         run: |
           cd simple_live_app
+          # 核心修复：在命令行强制覆盖intl版本，无需改源码
+          flutter pub add intl:0.19.0 --override
           flutter pub get
 
       - name: 构建Android正式版APK

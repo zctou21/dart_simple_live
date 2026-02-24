@@ -24,24 +24,20 @@ jobs:
         with:
           channel: 'stable'
 
-      # 关键步骤：自动寻找 pubspec.yaml 所在的文件夹并进入
+      # 第一步：获取依赖 (指定在 simple_live_app 目录下)
       - name: Install dependencies
-        run: |
-          # 寻找 pubspec.yaml 所在的目录
-          PROJECT_ROOT=$(find . -name "pubspec.yaml" -exec dirname {} \;)
-          echo "Found project root at: $PROJECT_ROOT"
-          cd $PROJECT_ROOT
-          flutter pub get
+        working-directory: ./simple_live_app
+        run: flutter pub get
 
+      # 第二步：构建 APK (指定在 simple_live_app 目录下)
       - name: Build APK
-        run: |
-          PROJECT_ROOT=$(find . -name "pubspec.yaml" -exec dirname {} \;)
-          cd $PROJECT_ROOT
-          flutter build apk --release --split-per-abi
+        working-directory: ./simple_live_app
+        run: flutter build apk --release --split-per-abi
 
+      # 第三步：上传产物
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: dart-simple-live-apk
-          # 动态匹配所有生成的 apk 文件，不管它在哪个子目录下
-          path: "**/build/app/outputs/flutter-apk/*.apk"
+          name: simple-live-mobile-apk
+          # 路径指向 simple_live_app 内部生成的构建结果
+          path: simple_live_app/build/app/outputs/flutter-apk/*.apk

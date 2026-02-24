@@ -24,20 +24,20 @@ jobs:
         with:
           channel: 'stable'
 
-      # 第一步：获取依赖 (指定在 simple_live_app 目录下)
-      - name: Install dependencies
+      # 关键修正步骤：解决 intl 版本冲突
+      - name: Resolve dependency conflicts
         working-directory: ./simple_live_app
-        run: flutter pub get
+        run: |
+          # 强制将 intl 升级到满足 SDK 要求的 0.20.2 版本
+          flutter pub add intl:0.20.2
+          flutter pub get
 
-      # 第二步：构建 APK (指定在 simple_live_app 目录下)
       - name: Build APK
         working-directory: ./simple_live_app
         run: flutter build apk --release --split-per-abi
 
-      # 第三步：上传产物
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: simple-live-mobile-apk
-          # 路径指向 simple_live_app 内部生成的构建结果
           path: simple_live_app/build/app/outputs/flutter-apk/*.apk

@@ -11,7 +11,7 @@ jobs:
       - name: 安装Flutter SDK
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.0'
+          flutter-version: '3.24.0'
           channel: 'stable'
 
       - name: 进入Flutter应用目录并安装依赖

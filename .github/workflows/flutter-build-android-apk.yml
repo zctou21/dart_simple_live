@@ -26,19 +26,15 @@ jobs:
         with:
           channel: 'stable'
 
-      # 关键修改点：使用 working-directory 指定子目录
+      # 直接在当前目录下执行，不再手动指定 working-directory
       - name: Install dependencies
-        working-directory: ./dart_simple_live
         run: flutter pub get
 
-      # 关键修改点：构建时也需要进入子目录
       - name: Build APK
-        working-directory: ./dart_simple_live
         run: flutter build apk --release --split-per-abi
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: dart-simple-live-apk
-          # 注意：路径也要加上子目录前缀
-          path: dart_simple_live/build/app/outputs/flutter-apk/*.apk
+          path: build/app/outputs/flutter-apk/*.apk

@@ -24,14 +24,24 @@ jobs:
         with:
           channel: 'stable'
 
-      # 关键修正步骤：解决 intl 版本冲突
+      # 步骤 1：解决 intl 依赖冲突
       - name: Resolve dependency conflicts
         working-directory: ./simple_live_app
         run: |
-          # 强制将 intl 升级到满足 SDK 要求的 0.20.2 版本
           flutter pub add intl:0.20.2
           flutter pub get
 
+      # 步骤 2：伪造 key.properties 文件 (解决 line 44 报错的关键)
+      - name: Create dummy key.properties
+        working-directory: ./simple_live_app/android
+        run: |
+          echo "storePassword=android" > key.properties
+          echo "keyPassword=android" >> key.properties
+          echo "keyAlias=androiddebugkey" >> key.properties
+          # 使用 Android SDK 自带的默认调试签名文件路径
+          echo "storeFile=/home/runner/.android/debug.keystore" >> key.properties
+
+      # 步骤 3：正式构建 APK
       - name: Build APK
         working-directory: ./simple_live_app
         run: flutter build apk --release --split-per-abi

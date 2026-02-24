@@ -1,47 +1,49 @@
 name: Build Android APK
-
-# 触发条件：当推送到 main 分支，或者手动触发
 on:
   push:
     branches:
       - main
       - master
-  workflow_dispatch: # 允许在 Actions 页面手动点击运行
+  workflow_dispatch: # 手动触发
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       # 1. 拉取代码
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. 安装 Java 环境 (Android 构建必须)
+      # 2. 安装 Java 17（Android编译必须）
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      # 3. 安装 Flutter 环境
+      # 3. 安装 Flutter 3.27.0（自带Dart 3.6.1，匹配项目要求）
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          # 如果项目对版本有特定要求，可以指定版本，例如: flutter-version: '3.16.0'
+          flutter-version: '3.27.0' # 锁定版本，避免低版本Dart
 
-      # 4. 获取依赖
-      - name: Install dependencies
-        run: flutter pub get
+      # 4. 进入子目录 + 修复intl冲突 + 安装依赖
+      - name: Install dependencies (fix intl conflict)
+        run: |
+          cd simple_live_app # 必须进入Flutter项目目录
+          flutter pub add intl:0.19.0 --override # 修复intl版本冲突
+          flutter pub get
 
-      # 5. 构建 APK (生成 release 版本)
+      # 5. 构建拆分架构的Release版APK
       - name: Build APK
-        run: flutter build apk --release --split-per-abi
+        run: |
+          cd simple_live_app
+          flutter build apk --release --split-per-abi
 
-      # 6. 将生成的 APK 上传到 GitHub Actions 产物中
+      # 6. 上传所有生成的APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: dart-simple-live-apk
-          path: build/app/outputs/flutter-apk/*.apk
+          path: simple_live_app/build/app/outputs/flutter-apk/*.apk # 路径要对应子目录
